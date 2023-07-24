@@ -27,68 +27,54 @@ const appStructure = [
   },
 ];
 
-//Function to create a directory
-function createDir(selectPath) {
-  fs.mkdir(path.join(__dirname, `/${selectPath}`), {}, (err) => {
-    if (err) throw err;
-    console.log("Step 1: create folder => ok");
+// function to create the structure of directories & add files to them
+function createDir(selectPath, title, bgcolor) {
+  fs.promises.mkdir(path.join(__dirname, `/${selectPath}`), { recursive: true })
+  .then(() => {
+    console.log(title + " directory created");
+    fs.writeFile(
+      path.join(__dirname, `/${selectPath}`, "index.html"),
+      `<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${title}</title>
+                <link rel="stylesheet" href="style.css">
+            </head>
+            <body>
+                <h1>${title}</h1>
+            </body>
+            </html>`,
+        (err) => {
+          if (err) throw err;
+          console.log(title + " HTML file created");
+        }
+    );
+
+    fs.writeFile(
+      path.join(__dirname, `/${selectPath}`, "style.css"),
+      `body {
+                background-color: ${bgcolor};
+            }`,
+      (err) => {
+        if (err) throw err;
+        console.log(title + " CSS file created");
+      }
+    );
   });
 }
 
-// async function createDir(selectPath) {
-//   fs.mkdir(path.join(__dirname, `/${selectPath}`), {}, (err) => {
-//     if (err) throw err;
-//     console.log("Step 1: create folder => ok");
-//   });
-// }
-
-
-// Function to create the HTML and CSS files with the required variables as parameters
-const createFiles = (selectPath, title, bgcolor) => {
-  fs.writeFile(
-    path.join(__dirname, `${selectPath}`, "index.html"),
-    `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${title}</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1>${title}</h1>
-    </body>
-    </html>`,
-    (err) => {
-      if (err) throw err;
-      console.log("Step 2: create HTML => ok");
-    }
+for (let i = 0; i < appStructure.length; i++) {
+  createDir(
+    appStructure[i].path,
+    appStructure[i].title,
+    appStructure[i].bgcolor
   );
+}
 
-  fs.writeFile(
-    path.join(__dirname, `/${selectPath}`, "style.css"),
-    `body {
-        background-color: ${bgcolor};
-    }`,
-    (err) => {
-      if (err) throw err;
-      console.log("Step 3: css bg => ok");
-    }
-  );
-};
-
-//Loops through our functions to create folders and add files for each object in our App Structure
-appStructure.forEach((data) => {
-  createDir(data.path);
-  setTimeout(function () {
-    createFiles(data.path, data.title, data.bgcolor);
-  }, 500);
-  //   createFiles(data.path, data.title, data.bgcolor)
-});
-
-//Adds a info file text with the OS type
 fs.writeFile(
-  path.join(__dirname, '/client', "info.txt"),
+  path.join(__dirname, "/client", "info.txt"),
   `This is being run on a ${os.type()} computer!`,
   (err) => {
     if (err) throw err;
